@@ -1,0 +1,62 @@
+<html>
+<head>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <meta charset="utf-8">
+  <title>Mirvald</title>
+<style>
+svg {
+  background: #fff;
+}
+
+circle {
+  fill: none;
+  stroke: #000;
+}
+</style>
+</head>
+<body>
+<script>
+var width = 300;
+var height = 400;
+svg = d3.select('body').append('svg')
+  .attr('height', height)
+  .attr('width', width);
+
+var stroke = 10;
+var minRadius = stroke * 1.5;
+var radiuses = d3.range(minRadius, height / 2, stroke * 2);
+
+var updatePeriod = 55;
+var l = radiuses.length;
+
+d3.timer(function(elapsed){
+  
+  var i = Math.round(elapsed / updatePeriod);
+
+  var grow = Math.floor(i / l) % 2;
+
+  if (grow === 0){
+    drawCircles(radiuses.slice(0, i%l));
+  }
+  else{
+    drawCircles(radiuses.slice(0, l - i % l));
+  }
+
+});
+
+function drawCircles(data){
+  var circles = svg.selectAll('circle')
+  .data(data);
+  
+  circles.enter()
+  .append('circle')
+  .attr('cx', width / 2)
+  .attr('cy', height / 2)
+  .attr('r', function (d) { return d; })
+  .style('stroke-width', stroke);
+ circles.exit().remove();
+  
+}
+</script>
+</body>
+</html>

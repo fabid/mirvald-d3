@@ -1,0 +1,121 @@
+<html>
+<head>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <meta charset="utf-8">
+  <title>Mirvald</title>
+<style>
+svg {
+  background: #647372;
+}
+
+circle {
+  stroke: #244F6D;
+  fill: #647372;
+}
+
+path {
+ fill: none;
+ stroke: none;
+}
+</style>
+</head>
+<body>
+<script>
+var width = 300,
+    height = 400;
+svg = d3.select('body').append('svg')
+  .attr('height', height)
+  .attr('width', width);
+
+//let's generate our curve
+var r = 50;
+var keyStep = 5;
+var yArray = d3.range(0, height, keyStep);
+
+var periodV = height / 2;
+
+var xyArray = yArray.map(
+	function(d){
+    return{
+      y: d,
+      x: Math.sin(d * 2 * Math.PI / periodV) * width / 2 + width / 2
+    };
+  }); 
+
+var periodH = width / 2.4;
+var xyArray = xyArray.map(function (d) {
+    return {
+     y: d.y + Math.sin(d.x * 2 * Math.PI / periodH) * height / 16 + Math.random() * height / 8,
+     x: d.x
+       };
+                          
+   }); 
+
+var path = svg.append("path")
+    .data([xyArray.map( function (d) { return [d.x, d.y]; })])
+    .attr("d", d3.svg.line()
+    .tension(0)
+    .interpolate("basis-closed"));
+
+
+var length = path.node().getTotalLength();
+var step = 5;
+var pointsOnPath = d3.range(0, length, step);
+
+var activeLength = Math.floor(lengthv * 0.10);
+
+var speed = 2;
+var data = [];
+
+d3.timer(function(elapsed){
+  var start = Math.floor(elapsed/speed) % length;
+  var end = start + activeLength;
+  if (end > length){
+      end = end % length;
+      data = pointsOnPath.filter(function(d){
+      return (d > start || d < end);
+      
+    });
+  }
+  else {
+    data = pointsOnPath.filter(function(d){
+      return (d > start && d < end);  
+    });
+  }
+  //console.log(end);
+  drawPipe(data, end);
+  
+});
+
+var colors = ['#7EC9E3', '#0AAEE4','#40B5D5','#00547D', '#009BA7', '#65B29E', '#38B0AC'];
+
+var ncolors = colors.length;
+
+function drawPipe(data, end){
+ circles =svg.selectAll('.c')
+  .data(data, function(d){return d;});
+ circles.transition().duration(speed).style('stroke', function(d){
+
+   var i = Math.round((end - d) / activeLength * ncolors);
+   if (i < 0) {i = ncolors - i ;}
+
+   return colors[i];
+   
+ });
+
+ circles.enter()
+  .append('circle')
+  .attr('class', 'c')
+  .attr('cx', 0)
+  .attr('cy', 0)
+  .attr('r', r)
+  .attr('transform', function(d){
+    var p = path.node().getPointAtLength(d);
+    return "translate(" + p.x + "," + p.y + ")";
+  }); 
+  circles.exit().remove();
+  
+}
+</script>
+</body>
+</html>

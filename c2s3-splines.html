@@ -1,0 +1,89 @@
+<html>
+<head>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <meta charset="utf-8">
+  <title>Mirvald</title>
+<style>
+svg {
+  background: #fff;
+}
+
+circle {
+  stroke: #000;
+  fill: #fff;
+}
+
+path {
+ fill: none;
+ stroke: #ff0000;
+ stroke-width: 2px; 
+}
+</style>
+</head>
+<body>
+<script>
+var width = 300,
+    height = 400;
+svg = d3.select('body').append('svg')
+  .attr('height', height)
+  .attr('width', width);
+
+
+// let's generate our curve
+var r = 40;
+var keyStep = 5;
+var yArray = d3.range(0, height, keyStep);
+
+var periodV = height / 2;
+var periodH = width / 2.4;
+
+
+var xyArray = yArray.map(function(d){
+  return {
+    y: d,
+    x: Math.sin(d * 2 * Math.PI / periodV) * width / 2 + width / 2
+  };
+});
+
+var xyArray = xyArray.map(function(d){
+  return {
+    y: d.y + Math.sin(d.x * 2 * Math.PI / periodH) * height / 16 + Math.random() * height / 8,
+    x: d.x
+  };
+
+});
+
+var path = svg.append("path")
+    .data([xyArray.map(function(d){ return [d.x, d.y]; })])
+    .attr("d", d3.svg.line()
+    .tension(0)
+    .interpolate("basis-open"));
+
+svg.selectAll('.dot')
+  .data(xyArray)
+  .enter()
+  .append('circle')
+  .attr('class', 'dot')
+  .attr('cx', function(d){return d.x;})
+  .attr('cy', function(d){return d.y;})
+  .attr('r', 2);
+
+var length = path.node().getTotalLength();
+var step = 10;
+var pointsOnPath = d3.range(0, length, step);
+
+svg.selectAll('.c')
+  .data(pointsOnPath)
+  .enter()
+  .append('circle')
+  .attr('class', 'c')
+  .attr('cx', 0)
+  .attr('cy', 0)
+  .attr('r', r)
+  .attr('transform', function(d){
+    var p = path.node().getPointAtLength(d);
+    return "translate(" + p.x + "," + p.y + ")";
+  });
+</script>
+</body>
+</html>

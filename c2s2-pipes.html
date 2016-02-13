@@ -1,0 +1,71 @@
+<html>
+<head>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <meta charset="utf-8">
+  <title>Mirvald</title>
+<style>
+svg {
+  background: #fff;
+}
+
+circle {
+  stroke: none;
+}
+</style>
+</head>
+<body>
+<script>
+var width = 300,
+    height = 400;
+var svg = d3.select('body').append('svg')
+  .attr('height', height)
+  .attr('width', width);
+
+// distance between centers
+var step = 10;
+// be carefull to the parity of the number of elements in cyArray,
+// it will determine if we finish by a white or black circle
+var cyArray = d3.range(-step, height + step, step);
+
+var total = 0;
+var radiuses = [];
+var maxRadius = 50;
+var minRadius = 10;
+
+// generate random radiuses
+while (total < width){
+  var r = Math.floor(Math.random() * (maxRadius - minRadius) + minRadius);
+  radiuses.push(r);
+  total = total + 2 * r;
+}
+
+var cx = 0;
+var data = [];
+radiuses.map(function (r) {
+  cyArray.reverse();
+  cx = cx + r;
+  cyArray.map(function (cy) {
+    data.push({
+      r: r,
+      y: cy,
+      x: cx,
+    });
+  });
+  
+  cx = cx + r;
+  return;
+  
+});
+
+svg.selectAll('circle')
+  .data(data)
+  .enter()
+  .append('circle')
+  .attr('cx', function (d) { return d.x; })
+  .attr('cy', function (d) { return d.y; })
+  .attr('r', function (d) { return d.r; })
+  .style('fill', function (d, i){ return i%2===0? '#000': '#fff'; });
+
+</script>
+</body>
+</html>
